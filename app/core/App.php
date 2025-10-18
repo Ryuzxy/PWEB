@@ -1,20 +1,25 @@
 <?php
 class App {
-    protected $controller = 'PendaftaranController';
-    protected $method = 'form';
+    protected $controller = 'LoginController';
+    protected $method = 'index';
     protected $params = [];
 
     public function __construct() {
         $url = $this->parseURL();
 
         // 1️⃣ Tentukan controller
-        if (isset($url[0]) && file_exists('../app/controllers/' . ucfirst($url[0]) . 'Controller.php')) {
-            $this->controller = ucfirst($url[0]) . 'Controller';
-            unset($url[0]);
-        }
+        $controllerName = isset($url[0]) ? ucfirst($url[0]) . 'Controller' : $this->controller;
+        $controllerPath = __DIR__ . '/../controllers/' . $controllerName . '.php';
 
-        require_once '../app/controllers/' . $this->controller . '.php';
-        $this->controller = new $this->controller;
+        if (file_exists($controllerPath)) {
+            require_once $controllerPath;
+            $this->controller = new $controllerName;
+            unset($url[0]);
+        } else {
+            // Jika tidak ada, fallback ke LoginController
+            require_once __DIR__ . '/../controllers/LoginController.php';
+            $this->controller = new LoginController();
+        }
 
         // 2️⃣ Tentukan method
         if (isset($url[1]) && method_exists($this->controller, $url[1])) {
@@ -26,15 +31,22 @@ class App {
         $this->params = $url ? array_values($url) : [];
 
         // 4️⃣ Jalankan controller & method
-        call_user_func_array([$this->controller, $this->method], $this->params);
+        try {
+            call_user_func_array([$this->controller, $this->method], $this->params);
+        } catch (Throwable $e) {
+            http_response_code(500);
+            echo "<h3>Terjadi kesalahan:</h3>";
+            echo "<pre>{$e->getMessage()}</pre>";
+        }
     }
 
     private function parseURL() {
-        if (isset($_GET['url'])) {
-            $url = rtrim($_GET['url'], '/');
-            $url = filter_var($url, FILTER_SANITIZE_URL);
-            return explode('/', $url);
-        }
-        return []; // pastikan mengembalikan array kosong agar tidak error
+    if (isset($_GET['url'])) {
+        $url = rtrim($_GET['url'], '/');
+        $url = filter_var($url, FILTER_SANITIZE_URL);
+        $url = explode('/', strtolower($url)); // 🔹 lowercase semua
+        return $url;
     }
+    return [];
+}
 }

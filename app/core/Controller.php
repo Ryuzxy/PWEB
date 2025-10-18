@@ -1,8 +1,13 @@
 <?php
 class Controller {
     public function views($view, $data = []) {
-        extract($data);
-        require_once __DIR__ . '/../views/' . $view . '.php';
+        $viewPath = __DIR__ . '/../views/' . strtolower($view) . '.php';
+
+        if (file_exists($viewPath)) {
+            require_once $viewPath;
+        } else {
+            die("❌ View '$view' tidak ditemukan di: $viewPath");
+        }
     }
     public function models($model) {
         require_once __DIR__ . '/../models/' . $model . '.php';
