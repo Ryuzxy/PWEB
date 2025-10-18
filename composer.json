@@ -1,0 +1,16 @@
+{
+    "name": "ryuxy/pweb",
+    "autoload": {
+        "psr-4": {
+            "Ryuxy\\Pweb\\": "src/"
+        }
+    },
+    "authors": [
+        {
+            "name": "Ryuzxy",
+            "email": "thelavtovois@gmail.com"
+        }
+    ],
+    "require": {}
+    
+}
