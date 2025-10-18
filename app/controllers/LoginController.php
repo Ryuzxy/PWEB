@@ -20,7 +20,6 @@ class LoginController extends Controller {
         if ($model->login($username, $password)) {
             $_SESSION['user'] = $username;
 
-            // 🔹 redirect pakai huruf kecil sesuai route App.php
             header('Location: /dashboard');
             exit;
         } else {
@@ -29,9 +28,19 @@ class LoginController extends Controller {
         }
     }
 
-    public function logout() {
-        session_start();
+    public function logout()
+    {
+        // Hapus semua data session dengan aman
+        $_SESSION = [];
+        if (ini_get('session.use_cookies')) {
+            $params = session_get_cookie_params();
+            setcookie(session_name(), '', time() - 42000,
+                $params['path'], $params['domain'],
+                $params['secure'], $params['httponly']
+            );
+        }
         session_destroy();
+
         header('Location: /login');
         exit;
     }
